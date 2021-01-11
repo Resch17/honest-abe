@@ -1,3 +1,11 @@
+h1 {
+  font-size: 36px;
+}
+
 .isHidden {
   display: none;
+}
+
+.politician {
+  border-bottom: 2px solid black;
 }
