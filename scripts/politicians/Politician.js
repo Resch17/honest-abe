@@ -1,11 +1,45 @@
-import { usePacDonations } from '../pacs/pacDonationsDataProvider.js';
+import { useInterests } from '../misc/interestDataProvider.js';
 import { usePacs } from '../pacs/pacDataProvider.js';
+import { useCorporations } from '../corporations/corporationDataProvider.js';
+import { usePacDonations } from '../pacs/pacDonationsDataProvider.js';
+import { useLegislation } from '../misc/legislationDataProvider.js';
+import { usePoliticianLegislation } from './politationLegislationDataProvider.js';
+import { useCorporateInterests } from '../corporations/corporateInterestsDataProvider.js';
+import { useCorporateDonations } from '../corporations/corporateDonationsDataProvider.js';
 
 export const Politician = (politician) => {
+  const legislation = useLegislation();
+  const interests = useInterests();
   const pacs = usePacs();
-  const donations = usePacDonations();
+  const corporations = useCorporations();
+  const polBills = usePoliticianLegislation();
+  const pacDonations = usePacDonations();
+  const corporateInterests = useCorporateInterests();
+  const corporateDonations = useCorporateDonations();
 
-  const donationsToThisPol = donations.filter(
+  const sponsoredBills = polBills.filter(
+    (rel) => rel.politicianId === politician.id
+  );
+
+  const billsHtml = () => {
+    if (sponsoredBills.length > 0) {
+      return sponsoredBills
+        .map((rel) => {
+          let thisBill = legislation.find(
+            (bill) => bill.id === rel.legislationId
+          );
+          let thisBillInterest = interests.find(
+            (i) => i.id === thisBill.interestId
+          );
+          return `<div>${thisBill.name} (Interest: ${thisBillInterest.about})</div>`;
+        })
+        .join('');
+    } else {
+      return `<div>No Sponsored Legislation Found</div>`;
+    }
+  };
+
+  const donationsToThisPol = pacDonations.filter(
     (d) => d.politicianId === politician.id
   );
 
@@ -14,14 +48,14 @@ export const Politician = (politician) => {
       return donationsToThisPol
         .map((donation) => {
           const pac = pacs.find((p) => p.id === donation.pacId);
-  
+
           return `
         <li>${pac.registeredName} ($${donation.amount})</li>
         `;
         })
         .join('');
     } else {
-      return `<li>No PAC Donations Found</li>`
+      return `<li>No PAC Donations Found</li>`;
     }
   };
 
@@ -34,9 +68,17 @@ export const Politician = (politician) => {
       <div>Age: ${politician.age}</div>
       <div>Represents: ${politician.district}</div>
     </div>
-    <div class="politician__pac-donations">
-      <h2>PAC Donations</h2>
-      <ul>${donationsHtml()}</ul>
+    <div class="politician__bills">
+      <h2>Sponsored Bills</h2>
+      ${billsHtml()}
+    </div>
+    <div class="politician__funders">
+      <h2>Related PACs</h2>
+      <ul></ul>
+      </div>
+      <div class="politician__influencers">
+      <h3>Influencing Corporations</h3>
+      <ul></ul>
     </div>
   </section>
   `;
