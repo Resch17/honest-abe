@@ -39,23 +39,21 @@ export const Politician = (politician) => {
     }
   };
 
-  const donationsToThisPol = pacDonations.filter(
+  const relatedPacs = pacDonations.filter(
     (d) => d.politicianId === politician.id
   );
 
-  const donationsHtml = () => {
-    if (donationsToThisPol.length > 0) {
-      return donationsToThisPol
-        .map((donation) => {
-          const pac = pacs.find((p) => p.id === donation.pacId);
+  const relatedPacObjects = relatedPacs.map((rel) => {
+    return pacs.find((pac) => pac.id === rel.pacId);
+  });
 
-          return `
-        <li>${pac.registeredName} ($${donation.amount})</li>
-        `;
-        })
+  const relatedPacNamesHtml = () => {
+    if (relatedPacs.length > 0) {
+      return relatedPacObjects
+        .map((p) => `<li>${p.registeredName}</li>`)
         .join('');
     } else {
-      return `<li>No PAC Donations Found</li>`;
+      return `<li>No Related PACs found.</li>`;
     }
   };
 
@@ -74,9 +72,9 @@ export const Politician = (politician) => {
     </div>
     <div class="politician__funders">
       <h2>Related PACs</h2>
-      <ul></ul>
-      </div>
-      <div class="politician__influencers">
+      <ul>${relatedPacNamesHtml()}</ul>
+    </div>
+    <div class="politician__influencers">
       <h3>Influencing Corporations</h3>
       <ul></ul>
     </div>
